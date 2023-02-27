@@ -22,7 +22,12 @@ tokenizer = AutoTokenizer.from_pretrained("./models/checkpoint-61500/")
 
 def tokenize_function(example):
     return tokenizer(
-        example["sequence"], padding=True, return_tensors="pt", is_split_into_words=True
+        example["sequence"],
+        padding=True,
+        return_tensors="pt",
+        is_split_into_words=True,
+        truncation=True,
+        model_max_length=512,
     )
 
 
