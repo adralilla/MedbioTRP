@@ -53,3 +53,4 @@ trainer = Trainer(
 )
 
 trainer.train()
+trainer.save_model("./models")
