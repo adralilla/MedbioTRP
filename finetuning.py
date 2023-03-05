@@ -29,33 +29,27 @@ model = AutoModelForSequenceClassification.from_config(config)
 
 with open(training_set_bact) as f:
     records_train_bact = f.readlines()
-records_train_bact = pd.DataFrame(
-    {"sentences": random.sample(records_train_bact, n), "label": 0}
-)
+records_train_bact = pd.DataFrame({"sentences": random.sample(records_train_bact, n)})
 
-with open(training_set_phage) as f:
-    records_train_phage = f.readlines()
-records_train_phage = pd.DataFrame(
-    {"sentences": random.sample(records_train_phage, n), "label": 1}
-)
+# with open(training_set_phage) as f:
+#     records_train_phage = f.readlines()
+# records_train_phage = pd.DataFrame(
+#     {"sentences": random.sample(records_train_phage, n), "label": 1}
+# )
 
 with open(eval_set_bact) as f:
     records_eval_bact = f.readlines()
-records_eval_bact = pd.DataFrame(
-    {"sentences": random.sample(records_eval_bact, n), "label": 0}
-)
-with open(eval_set_phage) as f:
-    records_eval_phage = f.readlines()
-records_eval_phage = pd.DataFrame(
-    {"sentences": random.sample(records_eval_phage, n), "label": 1}
-)
+records_eval_bact = pd.DataFrame({"sentences": random.sample(records_eval_bact, n)})
+# with open(eval_set_phage) as f:
+#     records_eval_phage = f.readlines()
+# records_eval_phage = pd.DataFrame(
+#     {"sentences": random.sample(records_eval_phage, n), "label": 1}
+# )
 
-train_dataset = Dataset.from_pandas(
-    pd.concat([records_train_bact, records_train_phage], ignore_index=True)
-)
-eval_dataset = Dataset.from_pandas(
-    pd.concat([records_eval_bact, records_eval_phage], ignore_index=True)
-)
+train_dataset = Dataset.from_pandas(records_train_bact)
+
+eval_dataset = Dataset.from_pandas(records_eval_bact)
+
 training_args = TrainingArguments("test-trainer", evaluation_strategy="epoch")
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 
