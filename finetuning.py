@@ -9,6 +9,8 @@ from transformers import (
 )
 import pandas as pd
 from datasets import Dataset
+import evaluate
+import numpy as np
 
 training_set_bact = "/scratch/fastscratch/NBL/training_datasets/inherit_phage/IDS_InheritDBTraining_LabelBac_k6_lcashift1_Ls512"
 training_set_phage = "/scratch/fastscratch/NBL/training_datasets/inherit_phage/IDS_InheritDBTraining_LabelPha_k6_lcashift1_Ls512"
@@ -24,8 +26,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device:", device)
 print()
 
-config = AutoConfig.from_pretrained(f"{model_path}config.json")
-model = AutoModelForSequenceClassification.from_config(config)
 
 with open(training_set_bact) as f:
     tmp = f.readlines()
@@ -74,9 +74,19 @@ eval_dataset = Dataset.from_pandas(
     pd.concat([records_eval_bact, records_eval_phage], ignore_index=True)
 )
 
+metric = evaluate.load("accuracy")
+config = AutoConfig.from_pretrained(f"{model_path}config.json")
+model = AutoModelForSequenceClassification.from_config(config)
 
 training_args = TrainingArguments("test-trainer", evaluation_strategy="epoch")
 tokenizer = AutoTokenizer.from_pretrained(model_path)
+
+
+def compute_metrics(eval_pred):
+    logits, labels = eval_pred
+    predictions = np.argmax(logits, axis=-1)
+    return metric.compute(predictions=predictions, references=labels)
+
 
 trainer = Trainer(
     model=model,
@@ -84,6 +94,7 @@ trainer = Trainer(
     train_dataset=train_dataset,
     eval_dataset=eval_dataset,
     tokenizer=tokenizer,
+    compute_metrics=compute_metrics,
 )
 
 trainer.train()
